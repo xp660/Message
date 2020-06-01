@@ -1,0 +1,40 @@
+﻿@model Messegebox.Models.Guestbooks
+
+@{
+    ViewBag.Title = "修改留言";
+}
+@*匯入驗證欄位所須的JavaScript*@
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval.js")
+}
+@*建立修改欄位所須的表單*@
+@using (Html.BeginForm())
+{
+    <h3>修改留言</h3>
+    @*建立修改留言表格*@
+    <div class="form-group">
+
+        @Html.LabelFor(model => model.Name, htmlAttributes: new {@class= "control-label" })
+
+        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+        @Html.ValidationMessageFor(model => model.Name)
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.Content, htmlAttributes: new { @class = "control-label" })
+
+        @Html.EditorFor(model => model.Content, new { htmlAttributes = new { @class = "form-control" } })
+        @Html.ValidationMessageFor(model => model.Content)
+    </div>
+
+        @*判斷是否有人回覆，如果無人回覆，即可修改，否則不可修改*@
+        if (Model.ReplyTime == null)
+        {
+            <input type="submit" value="修改留言" class="btn-primary"/>
+        }
+        else
+        {
+            <text>此留言已回覆無法修改，請</text>
+            @Html.ActionLink("返回列表", "Index")
+        }
+ }

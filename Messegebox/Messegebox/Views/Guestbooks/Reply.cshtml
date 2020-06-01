@@ -1,0 +1,49 @@
+﻿@model Messegebox.Models.Guestbooks
+
+@Styles.Render("~/Content/css")
+@Scripts.Render("~/bundles/modernizr")
+
+
+@{
+    ViewBag.Title = "回覆留言";
+}
+@*建立回覆留言所須的表單*@
+@using (Html.BeginForm())
+{
+    <h3>回覆留言</h3>
+    @*建立回覆內容表格*@
+    <div class="form-group">
+        @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "label-control" })
+
+        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+        @Html.ValidationMessageFor(model => model.Name)
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.Content, htmlAttributes: new { @class = "label-control" })
+
+        @Html.EditorFor(model => model.Content, new { htmlAttributes = new { @class = "form-control" } })
+        @Html.ValidationMessageFor(model => model.Content)
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.Reply, htmlAttributes: new { @class = "label-control" })
+
+        @Html.EditorFor(model => model.Reply, new { htmlAttributes = new { @class = "form-control" } })
+        @Html.ValidationMessageFor(model => model.Reply)
+    </div>
+
+        @*一則留言僅可回覆一次，若被回覆，則顯示返回列表連結*@
+        if (Model.ReplyTime == null)
+        {
+        <input type="submit" value="回覆留言" class="btn-primary" />
+        }
+        else
+        {
+        <text>此留言已回覆，請</text>
+        @Html.ActionLink("返回列表", "Index")
+        }
+        }
+        @*匯入驗證所須的JavaScript*@
+        @section scripts
+{
+            @Scripts.Render("~/bundles/jqueryval.js")
+        }
