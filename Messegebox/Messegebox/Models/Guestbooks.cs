@@ -13,11 +13,9 @@ namespace Messegebox.Models
         public int Id { get; set; }
 
 
+        
+        public string Account { get; set; }
 
-        [DisplayName("名字：")]
-        [Required(ErrorMessage = "請輸入名字")]
-        [StringLength(20, ErrorMessage = "名字不可超過20字元")]
-        public string Name { get; set; }
 
 
         [DisplayName("留言內容：")]
@@ -41,5 +39,10 @@ namespace Messegebox.Models
         //回覆時間
         //DateTime?資料型態，允許DateTime有NULL產生
         public DateTime? ReplyTime { get; set; }
+
+
+        //會員從Member表來
+        //預設時就將Member物件建立完畢
+        public Members Member { get; set; } = new Members();
     }
 }

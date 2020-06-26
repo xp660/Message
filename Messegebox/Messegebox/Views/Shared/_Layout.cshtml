@@ -2,13 +2,17 @@
 <html>
 
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - 我的 ASP.NET 應用程式</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+
 </head>
+
+
+
 
 
 <body>
@@ -27,6 +31,20 @@
                     <li>@Html.ActionLink("首頁", "Index", "Home")</li>
                     <li>@Html.ActionLink("關於", "About", "Home")</li>
                     <li>@Html.ActionLink("連絡人", "Contact", "Home")</li>
+
+                    @*使用者登入才會顯示*@
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li style="color:white">您好，@(User.Identity.Name)</li>
+                        <li>@Html.ActionLink("修改密碼","ChangePassword","Members")</li>
+                        <li>@Html.ActionLink("登出", "Logout", "Members")</li>
+                    }
+                    else
+                    {
+                        <li>@Html.ActionLink("註冊","Register","Members")</li>
+                        <li>@Html.ActionLink("登入", "Login", "Members")</li>
+                    }
+
                 </ul>
             </div>
         </div>

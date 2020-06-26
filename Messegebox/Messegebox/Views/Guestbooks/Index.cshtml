@@ -4,105 +4,18 @@
     ViewBag.Title = "Index";
 }
 
+@Html.AntiForgeryToken()
+
+
+@*載入新增留言頁面*@
 <div id="CreateData">
     @Html.Action("Create")
 </div>
 
 <hr />
 
-<h2>留言板</h2>
-
-@*建立搜尋所需表單*@
-@using (Html.BeginForm("Index", "Guestbooks", FormMethod.Get))
-{
-    <div class="form-group">
-        @Html.LabelFor(model => model.Search, htmlAttributes: new { @class = "label-control" })
-
-        @Html.TextBoxFor(model => model.Search, new { htmlattributes = new { @class = "form-control" } })
-
-        <input type="submit" value="搜尋" class="btn-primary" />
-    </div>
-}
-
-@*如果資料庫有資料則顯示，列出新增、刪除、修改連結*@
-@if (!Model.DataList.Count.Equals(0))
-{
-    foreach (var item in Model.DataList)
-    {
-        
-        <div class="form-group">
-            @Html.LabelFor(model => model.DataList[0].Name, htmlAttributes: new { @class = "label-control" })
-            <text>@item.Name</text>
-        </div>
-        <div >
-            @Html.LabelFor(model => model.DataList[0].CreateTime, htmlAttributes: new { @class = "label-control" })
-            <text>@item.CreateTime</text>
-        </div>
-        <div >
-            @Html.LabelFor(model => model.DataList[0].Content, htmlAttributes: new { @class = "label-control" })
-            <text>@item.Content</text>
-        </div>
-        <div >
-            @Html.LabelFor(model => model.DataList[0].Reply, htmlAttributes: new { @class = "label-control" })
-            <text>@item.Reply</text>
-        </div>
-        <div >
-            @Html.LabelFor(model => model.DataList[0].ReplyTime, htmlAttributes: new { @class = "label-control" })
-            <text>@item.ReplyTime</text>
-        </div>
-        <div >
-            @Html.ActionLink("修改留言", "Edit", new { Id = item.Id })
-            @Html.ActionLink("回覆留言", "Reply", new { Id = item.Id })
-            @Html.ActionLink("刪除留言", "Delete", new { Id = item.Id })
-        </div>
-         <div>*********************************</div>
-    }
-}
-else
-{
-    <text>資料庫內查無資料</text>
-}
-
-<div class="form-group">
-    @*若目前所在頁數大於1，則顯示上一頁與最前頁的按鈕*@
-    @if (Model.Paging.NowPage > 1)
-    {
-        @Html.ActionLink("<<", "Index", new { Page = 1, Search = Model.Search })
-        <text>&nbsp;</text>
-        @Html.ActionLink("<", "Index", new { Page = Model.Paging.NowPage - 1, Search = Model.Search })
-    }
-
-    <text>&nbsp;</text>
-    @*顯示當前頁數前後各五頁的頁數*@
-    @for (var page = (Model.Paging.NowPage - 6); page < (Model.Paging.NowPage + 6); page++)
-    {
-        if ((page > 0) && (page <= Model.Paging.MaxPage))
-        {
-            if (page == Model.Paging.NowPage)
-            {
-                <text>&nbsp;</text><b>@page</b><text>&nbsp;</text>
-            }
-            else
-            {
-                @Html.ActionLink(page.ToString(), "Index", new { Page = page, Search = Model.Search })
-            }
-
-        }
-    }
-    <text>&nbsp;</text>
-    @*若目前所在頁數小於總頁數，則顯示下一頁與最後一頁的按鈕*@
-    @if (Model.Paging.NowPage < Model.Paging.MaxPage)
-    {
-        @Html.ActionLink(">", "Index", new { Page = Model.Paging.NowPage + 1, Search = Model.Search })
-        <text>&nbsp;</text>
-        @Html.ActionLink(">>", "Index", new { Page = Model.Paging.MaxPage, Search = Model.Search })
-    }
-
-</div>
-
-<div>
-    @Html.ActionLink("Back to List", "Index")
-</div>
+@*載入資料陣列頁面*@
+@Html.Action("GetDataList")
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")

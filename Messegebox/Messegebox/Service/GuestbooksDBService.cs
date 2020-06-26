@@ -36,7 +36,7 @@ namespace Messegebox
         //            Guestbooks Data = new Guestbooks
         //            {
         //                Id = Convert.ToInt32(dr["Id"]),
-        //                Name = dr["Name"].ToString(),
+        //                Account = dr["Account"].ToString(),
         //                Content = dr["Content"].ToString(),
         //                CreateTime = Convert.ToDateTime(dr["CreateTime"])
         //            };
@@ -67,8 +67,8 @@ namespace Messegebox
         #region 新增資料
         public void InsertGuestbooks(Guestbooks newData)
         {
-            string sql = $@"INSERT INTO Guestbooks(Name,Content,CreateTime) VALUES
-                        ('{newData.Name}' ,'{newData.Content}',
+            string sql = $@"INSERT INTO Guestbooks(Account,Content,CreateTime) VALUES
+                        ('{newData.Account}' ,'{newData.Content}',
                             '{DateTime.Now:yyyy - MM - dd HH: mm: ss}' ) ";
             try
             {
@@ -93,7 +93,9 @@ namespace Messegebox
         {
             Guestbooks Data = new Guestbooks();
 
-            string sql = $@"SELECT * FROM Guestbooks WHERE Id={Id};";
+            string sql = $@"select * from Guestbooks 
+                         m inner join Members d on m.Account = d.Account 
+                         WHERE Id={Id};";
 
             try
             {
@@ -105,7 +107,7 @@ namespace Messegebox
                 SqlDataReader dr = cmd.ExecuteReader();
                 dr.Read();
                 Data.Id = Convert.ToInt32(dr["Id"]);
-                Data.Name = dr["Name"].ToString();
+                Data.Account = dr["Account"].ToString();
                 Data.Content = dr["Content"].ToString();
                 Data.CreateTime = Convert.ToDateTime(dr["CreateTime"]);
                 //確定此則留言是否回覆，且不允許空白
@@ -114,6 +116,7 @@ namespace Messegebox
                     Data.Reply = dr["Reply"].ToString();
                     Data.ReplyTime = Convert.ToDateTime(dr["ReplyTime"]);
                 }
+                Data.Member.Name = dr["Name"].ToString();
             }
             catch (Exception e)
             {
@@ -133,7 +136,7 @@ namespace Messegebox
         #region 修改留言
         public void UpdateGuestbooks(Guestbooks UpdateData)
         {
-            string sql = $@"UPDATE Guestbooks SET Name='{UpdateData.Name}',
+            string sql = $@"UPDATE Guestbooks SET Account='{UpdateData.Account}',
                             Content='{UpdateData.Content}' WHERE Id={UpdateData.Id};";
 
             try
@@ -242,7 +245,7 @@ namespace Messegebox
 
             return DataList;
 
-            return DataList;
+           
         }
         #endregion
 
@@ -292,8 +295,7 @@ namespace Messegebox
             //計算列數
             int Row = 0;
             //Sql語法
-            string sql = $@" select * from Guestbooks Where Name like '%{Search}%' 
-                            or Content like '%{Search}%' or Reply like '%{Search}%' ";
+            string sql = $@" select * from Guestbooks Where Content like '%{Search}%' or Reply like '%{Search}%' ";
             
             try
             {
@@ -331,8 +333,9 @@ namespace Messegebox
         {
 
             List<Guestbooks> DataList = new List<Guestbooks>();
-            string sql = $@"SELECT * FROM (SELECT row_number() OVER(order by Id) AS sort,* FROM Guestbooks)
-                        m WHERE m.sort BETWEEN {(paging.NowPage - 1) * paging.ItemNum + 1} AND {paging.NowPage * paging.ItemNum};";
+            string sql = $@"select m.*, d.Name, d.IsAdmin from (select row_number() over(order by Id) as sort, * from Guestbooks)
+                        m inner join Members d on m.Account=d.Account 
+                        where m.sort Between {(paging.NowPage - 1) * paging.ItemNum + 1} and {paging.NowPage * paging.ItemNum};";
 
             try
             {
@@ -344,11 +347,13 @@ namespace Messegebox
                 SqlDataReader dr = cmd.ExecuteReader();
                 while (dr.Read()) //獲得下一筆資料直到沒有資料
                 {
-                    Guestbooks Data = new Guestbooks();
-                    Data.Id = Convert.ToInt32(dr["Id"]);
-                    Data.Name = dr["Name"].ToString();
-                    Data.Content = dr["Content"].ToString();
-                    Data.CreateTime = Convert.ToDateTime(dr["CreateTime"]);
+                    Guestbooks Data = new Guestbooks
+                    {
+                        Id = Convert.ToInt32(dr["Id"]),
+                        Account = dr["Account"].ToString(),
+                        Content = dr["Content"].ToString(),
+                        CreateTime = Convert.ToDateTime(dr["CreateTime"])
+                    };
                     //確定此則留言是否回覆，且不允許空白
                     //因C#是強型別語言，所以轉換時Datetime型態不允許存取null
                     if (!dr["ReplyTime"].Equals(DBNull.Value))
@@ -356,6 +361,8 @@ namespace Messegebox
                         Data.Reply = dr["Reply"].ToString();
                         Data.ReplyTime = Convert.ToDateTime(dr["ReplyTime"]);
                     }
+                    //會員資料
+                    Data.Member.Name = dr["Name"].ToString();
                     DataList.Add(Data);
                 }
             }
@@ -377,9 +384,10 @@ namespace Messegebox
         public List<Guestbooks> GetAllDataList(ForPaging paging,string Search)
         {
             List<Guestbooks> DataList = new List<Guestbooks>();
-            string sql = $@"SELECT * FROM (SELECT row_number() OVER(order by Id) AS sort,* FROM Guestbooks
-                            WHERE Name LIKE '%{Search}%' OR Content LIKE '%{Search}%' OR Reply LIKE '%{Search}%') m
-                        WHERE m.sort BETWEEN {(paging.NowPage - 1) * paging.ItemNum + 1} AND {paging.NowPage * paging.ItemNum};";
+            string sql = $@"select m.*,d.Name,d.IsAdmin from (select row_number() over(order by Id) as sort,* from Guestbooks 
+                            where Content like '%{Search}%' or Reply like '%{Search}%') 
+                            m inner join Members d on m.Account=d.Account 
+                            where m.sort Between {(paging.NowPage - 1) * paging.ItemNum + 1} and {paging.NowPage * paging.ItemNum}";
 
 
             try
@@ -392,11 +400,13 @@ namespace Messegebox
                 SqlDataReader dr = cmd.ExecuteReader();
                 while (dr.Read()) //獲得下一筆資料直到沒有資料
                 {
-                    Guestbooks Data = new Guestbooks();
-                    Data.Id = Convert.ToInt32(dr["Id"]);
-                    Data.Name = dr["Name"].ToString();
-                    Data.Content = dr["Content"].ToString();
-                    Data.CreateTime = Convert.ToDateTime(dr["CreateTime"]);
+                    Guestbooks Data = new Guestbooks
+                    {
+                        Id = Convert.ToInt32(dr["Id"]),
+                        Account = dr["Account"].ToString(),
+                        Content = dr["Content"].ToString(),
+                        CreateTime = Convert.ToDateTime(dr["CreateTime"])
+                    };
                     //確定此則留言是否回覆，且不允許空白
                     //因C#是強型別語言，所以轉換時Datetime型態不允許存取null
                     if (!dr["ReplyTime"].Equals(DBNull.Value))
@@ -404,6 +414,8 @@ namespace Messegebox
                         Data.Reply = dr["Reply"].ToString();
                         Data.ReplyTime = Convert.ToDateTime(dr["ReplyTime"]);
                     }
+                    //會員資料
+                    Data.Member.Name = dr["Name"].ToString();
                     DataList.Add(Data);
                 }
             }
